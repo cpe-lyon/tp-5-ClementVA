@@ -1,0 +1,101 @@
+Compte-Rendu d'Admin System
+
+Question 1:
+
+SR1 : 172.16.0.0 masque :/26 donc 255.255.255.192
+Adresse du réseau : 172.16.0.0
+1ère IP : 172.16.0.1
+Dernière IP : 172.16.0.62
+Brodcast : 172.16.0.63
+
+SR2 : 172.16.0.64 masque :/26 donc 255.255.255.192
+Adresse du réseau : 172.16.0.64
+1ère IP : 172.16.0.65
+Dernière IP : 172.16.0.126
+Brodcast : 172.16.0.127
+
+SR3 : 172.16.0.192 masque :/26 donc 255.255.255.192
+Adresse du réseau : 172.16.0.192
+1ère IP : 172.16.0.193
+Dernière IP : 172.16.0.254
+Brodcast : 172.16.0.255
+
+SR4 : 172.16.0.128 masque :/26 donc 255.255.255.192
+Adresse du réseau : 172.16.0.128
+1ère IP : 172.16.0.129
+Dernière IP : 172.16.0.190
+Brodcast : 172.16.0.191
+
+SR5 : 172.16.1.0 masque :/26 donc 255.255.255.192
+Adresse du réseau : 172.16.1.0
+1ère IP : 172.16.1.1
+Dernière IP : 172.16.1.62
+Brodcast : 172.16.1.63
+
+SR6 : 172.16.1.64 masque :/26 donc 255.255.255.192
+Adresse du réseau : 172.16.1.64
+1ère IP : 172.16.1.65
+Dernière IP : 172.16.1.126
+Brodcast : 172.16.1.127
+
+SR7 : 172.16.1.160 masque :/27 donc 255.255.255.224
+Adresse du réseau : 172.16.1.160
+1ère IP : 172.16.1.161
+Dernière IP : 172.16.1.190
+Brodcast : 172.16.1.191
+
+
+Réseaux encore disponibles : /27 (255.255.255.224) en 172.16.1.128
+			     /26 (255.255.255.192) en 172.16.1.192
+
+On utilise du VLSM (évidemment) pour éviter de gâcher des IPS et pour rendre le réseau plus maléable. On peut ainsi plus facilement ajouter des réseaux ultérieurement.
+
+
+EX 2:
+
+Je crée 2 VMS, pas de difficulté normalement. Je choisis une connexion en bridge pour qu'elles puissent dialoguer entre elles, acceder à internet et être détectées par mon téléphone dans une optique de debug éventuelle en cas de perte de connexion.
+Je crée deux interfaces réseau : la ens33 en bridge pour la connection et la ens38 en segment lan ou les deux machines vont se retrouver. Ce sous-réseau sera le réseau de travail.
+
+L'interface lo correspond à la loopback. C'est une adresse ip interne qu'on peut ping si l'appareil est un routeur ou se comporte en routeur. Cette adresse permet de joindre le pc et permet au pc de faire dialoguer plusieurs applications en utilisant les protocoles web simples à manipuler. Le PC peut ainsi se connecter à lui même. Un proxy interne peut par exemple demander au pc de tout envoyer sur lo, et il se charge de récupérer ce traffic et de la réexpédier.
+
+Exercice 3:
+petit rappel de à quoi sert le dhcp et pourquoi c'est important... A toi de le faire :)
+sudo apt install isc-dhcp-server
+La commande : systemctl status isc-dhcp-server indique que le service n'est pas configuré pour écouter sur une interface. C'est normal, on vient de l'installer.
+
+mv /etc/dhcp/dhcp.conf /etc/dhcp/dhcp.conf.bak pour renomer
+vim /etc/dhcp/dhcp.conf vim crée et ouvre un fichier vide.
+Par curiosité on ouvre le .bak : il présente les exemples de config avec des commentaires pour aider.
+On crée le fichier demandé. On modifie cependant l'ip server sur 192.168.100.254 
+Le lease time représente le temps qu'on possède l'ip. Default ? max? a toi de jouer :)
+
+on édite les fichiers demandés avec sudo vim
+
+ensuite dhspd -t jusqu'à ce qu'il trouve plus d'erreurs
+ensuite systemctl restart isc-dhcp-server
+enfin systemctl status isc-dhcp-server pour vérifier qu'il est bien modifié
+changer le nom : hostenamectl set-hostname client
+
+pour kill le bail dhcp sur le client : sudo dhclient -r
+pour le restart : sudo dhclient
+dhcp discover : trouver tous les servers dhcp
+ils repondent par dhcp offer en proposant une config
+le client en choisit un et envoit un dhcp request pour demander cette config
+le server repond avec un dhcp hack pour confirmer
+et c'est fini
+
+a la fin, le client fait un dhcp release pour redonner l'ip non nescessaire.
+ok pourla distribution d'IP dans la bonne plage
+
+le fichier contient
+heure de début, de fin, l'adresse mac, le nom du client ...
+
+dhcp-lease-list donne les  macs, ips, hostname, validité et createur de la varte reseau pour chaque client
+
+pour lier au hardware, on remplace l'accolade par çà :
+https://doc.ubuntu-fr.org/isc-dhcp-server
+
+Ok ex  fini !
+
+on relance : service bind9 restart
+lynx : c'est une horreur, c'est pas beau mais ca marche finalement plutot bien !
